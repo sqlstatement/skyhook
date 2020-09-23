@@ -2,7 +2,6 @@ import camel from 'camelcase'
 import winston from 'winston'
 import { DiscordPayload } from '../model/DiscordPayload'
 import { Embed } from '../model/Embed'
-import { EmbedFooter } from '../model/EmbedFooter'
 import { LoggerUtil } from '../util/LoggerUtil'
 
 /**
@@ -89,8 +88,6 @@ abstract class BaseProvider {
 
     protected addEmbed(embed: Embed): void {
         // TODO check to see if too many fields
-        // add the footer to all embeds added
-        embed.footer = new EmbedFooter('Powered by Skyhook')
         if (this.embedColor != null) {
             embed.color = this.embedColor
         }

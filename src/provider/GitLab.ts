@@ -52,8 +52,7 @@ class GitLab extends BaseProvider {
             for (const commit of project.commits) {
                 const message = (commit.message.length > 256) ? commit.message.substring(0, 255) + '\u2026' : commit.message
                 const field = new EmbedField()
-                field.name = 'Commit from ' + commit.author.name
-                field.value = '(' + '[`' + commit.id.substring(0, 7) + '`](' + commit.url + ')' + ') ' + (message == null ? '' : message.replace(/\n/g, ' ').replace(/\r/g, ' '))
+                field.value = '[`' + commit.id.substring(0, 7) + '`](' + commit.url + ') ' + (message == null ? '' : message.replace(/\n/g, ' ').replace(/\r/g, ' '))
                 field.inline = false
                 fields.push(field)
             }
