@@ -1,5 +1,4 @@
-require('dotenv').config()
-
+import dotenv from 'dotenv'
 import axios from 'axios'
 import bodyParser from 'body-parser'
 import express from 'express'
@@ -17,6 +16,7 @@ import { Codacy } from './provider/Codacy'
 import { DockerHub } from './provider/DockerHub'
 import { GitLab } from './provider/GitLab'
 import { Heroku } from './provider/Heroku'
+import { Instana } from './provider/Instana'
 import { Jenkins } from './provider/Jenkins'
 import { Jira } from './provider/Jira'
 import { NewRelic } from './provider/NewRelic'
@@ -29,6 +29,8 @@ import { Unity } from './provider/Unity'
 import { UptimeRobot } from './provider/UptimeRobot'
 import { VSTS } from './provider/VSTS'
 
+dotenv.config()
+
 LoggerUtil.init()
 
 const logger = LoggerUtil.logger()
@@ -39,7 +41,7 @@ const app = express()
 /**
  * Array of the classes
  */
-const providers: any[] = [
+const providers = [
     AppVeyor,
     Bintray,
     BitBucket,
@@ -49,6 +51,7 @@ const providers: any[] = [
     DockerHub,
     GitLab,
     Heroku,
+    Instana,
     Jenkins,
     Jira,
     NewRelic,
@@ -62,10 +65,14 @@ const providers: any[] = [
     VSTS
 ]
 
-const providersMap = new Map<string, any>()
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ArrayType<T extends Array<any>> = T extends (infer U)[] ? U : never
+type ProviderType = ArrayType<typeof providers>
+
+const providersMap = new Map<string, ProviderType>()
 const providerNames: string[] = []
-const providerInstances: BaseProvider[] = []
-const providerInfos: any[] = []
+const providerInstances: InstanceType<ProviderType>[] = []
+const providerInfos: { name: string, path: string }[] = []
 providers.forEach((Provider) => {
     const instance = new Provider()
     providerInstances.push(instance)
@@ -95,7 +102,7 @@ app.get('/providers', (req, res) => {
 
 app.get('/api/webhooks/:webhookID/:webhookSecret/:from', (req, res) => {
     // Return 200 if the provider is valid to show this url is ready.
-    const provider: any = req.params.from
+    const provider = req.params.from
     if (provider == null || providersMap.get(provider) == null) {
         const errorMessage = `Unknown provider ${provider}`
         logger.error(errorMessage)
@@ -150,13 +157,14 @@ app.post('/api/webhooks/:webhookID/:webhookSecret/:from', async (req, res) => {
             }
         }).then(() => {
             res.sendStatus(200)
-        }).catch((err: any) => {
+        }).catch((err) => {
             logger.error(err)
             res.status(502).send(err)
         })
     }
 })
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((req, res, next) => {
     res.status(404).send('Not Found')
 })

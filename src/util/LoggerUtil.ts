@@ -1,4 +1,4 @@
-import moment from 'moment'
+import { DateTime } from 'luxon'
 import winston from 'winston'
 
 /**
@@ -6,13 +6,12 @@ import winston from 'winston'
  */
 class LoggerUtil {
 
-    public static init() {
+    public static init(): void {
         if (!this.isInitialized) {
-            // @ts-ignore Method exists, will be added to ts def in next release.
             winston.loggers.add('logger', {
                 format: winston.format.combine(
                     winston.format.colorize(),
-                    winston.format.printf((info) => `[${moment().format('YYYY-MM-DD hh:mm:ss').trim()}] [${info.level}]: ${info.message}`)
+                    winston.format.printf((info) => `[${DateTime.local().toFormat('yyyy-MM-dd TT').trim()}] [${info.level}]: ${info.message}`)
                 ),
                 level: process.env.PRODUCTION ? 'info' : 'debug',
                 transports: [
@@ -22,8 +21,7 @@ class LoggerUtil {
         }
     }
 
-    public static logger() {
-        // @ts-ignore Method exists, will be added to ts def in next release.
+    public static logger(): winston.Logger {
         return winston.loggers.get('logger')
     }
 
